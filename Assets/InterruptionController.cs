@@ -18,7 +18,7 @@ public class InterruptionController : MonoBehaviour
     private Playable _timelinePlayable;
     private bool _isClipConnected = false;
     private bool _clipFinished = true;
-    //
+
     private void Start()
     {
         Instance = this;
@@ -31,10 +31,10 @@ public class InterruptionController : MonoBehaviour
 
         // Create a Playable for the Timeline
         _timelinePlayable = timelineDirector.playableAsset.CreatePlayable(_playableGraph, timelineDirector.gameObject);
-  
-        var count = _playableGraph.GetOutputCountByType<AnimationPlayableOutput>();
 
-        for (var i = 0; i < count; i++)
+        int count = _playableGraph.GetOutputCountByType<AnimationPlayableOutput>();
+
+        for (int i = 0; i < count; i++)
         {
             var output = (AnimationPlayableOutput)_playableGraph.GetOutputByType<AnimationPlayableOutput>(i);
             output.SetTarget(Animators[i]);
@@ -43,12 +43,12 @@ public class InterruptionController : MonoBehaviour
             {
                 // Create a MixerPlayable
                 _mixerPlayable = AnimationLayerMixerPlayable.Create(_playableGraph, 2);
-                
+
                 // Connect the AnimationClipPlayable to the MixerPlayable
                 _playableGraph.Connect(_timelinePlayable, 0, _mixerPlayable, 0);
 
                 // Set full weight for the animation clip initially (100% timeline animation, 0% null animation)
-                _mixerPlayable.SetInputWeight(0, 1f); 
+                _mixerPlayable.SetInputWeight(0, 1f);
 
                 output.SetSourcePlayable(_mixerPlayable);
             }
@@ -73,6 +73,13 @@ public class InterruptionController : MonoBehaviour
             animator.SetTrigger("BackHeadHit");
         }
 
+        // Move mug (stops working after playing timeline due to mixer limitations)
+        if (Input.GetKeyDown(KeyCode.M))
+        {
+            if (_isClipConnected) { Disconnect(); }
+            Animators[2].SetTrigger("Activate");
+        }
+
         // Finish interruption
         if (_isClipConnected && _clipFinished) { Disconnect(); }
 
@@ -85,9 +92,10 @@ public class InterruptionController : MonoBehaviour
 
     private void Disconnect()
     {
+        Debug.Log("Disconnected");
+
         // Disconnect the TimelinePlayable from the MixerPlayable
         _mixerPlayable.SetInputWeight(1, 0f); // Set weight for the timeline to 0
-        _mixerPlayable.SetInputWeight(0, 1f); // Restore weight for the animation clip
         _playableGraph.Disconnect(_mixerPlayable, 1); // Disconnect animation clip overlap with 
 
         _isClipConnected = false;
@@ -96,12 +104,14 @@ public class InterruptionController : MonoBehaviour
     public void InterruptTimeline(AnimationClip clip)
     {
         if (!_playableGraph.IsValid()) { return; }
+        Debug.Log("Connected");
+
+        // Create a new playable to start again
         _clipPlayable = AnimationClipPlayable.Create(_playableGraph, clip);
 
         // Connect the TimelinePlayable to the MixerPlayable
         //clipPlayable output1 gets wired into mixerPlayable input1
         _playableGraph.Connect(_clipPlayable, 0, _mixerPlayable, 1);
-        
         _mixerPlayable.SetLayerAdditive(1, true);
         _mixerPlayable.SetInputWeight(1, 1f);
 
