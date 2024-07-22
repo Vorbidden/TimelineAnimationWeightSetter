@@ -56,6 +56,23 @@
       "dependencies": {},
       "url": "https://packages.unity.com"
     },
+<<<<<<< Updated upstream
+=======
+    "com.unity.nuget.mono-cecil": {
+      "version": "1.11.4",
+      "depth": 4,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.playablegraph-visualizer": {
+      "version": "0.2.1-preview.3",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
+>>>>>>> Stashed changes
     "com.unity.render-pipelines.core": {
       "version": "12.1.15",
       "depth": 1,
